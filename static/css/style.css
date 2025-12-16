@@ -1,0 +1,160 @@
+:root {
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --secondary: #10B981;
+    --dark: #1F2937;
+    --light: #F9FAFB;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: #f8fafc;
+}
+
+.nav-link {
+    color: #6b7280;
+    padding: 0 0.25rem;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #111827;
+}
+
+.nav-link.active {
+    color: #111827;
+    font-weight: 500;
+    border-bottom-width: 2px;
+    border-bottom-color: #4F46E5;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-in-progress {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-draft {
+    background-color: #E5E7EB;
+    color: #374151;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+}
+
+.requirements-input {
+    min-height: 200px;
+    resize: vertical;
+}
+
+.generated-code {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 0.5rem;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.code-editor {
+    font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+.tag {
+    display: inline-block;
+    background-color: #E0E7FF;
+    color: #4F46E5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.template-card {
+    transition: all 0.3s ease;
+}
+
+.template-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-completed {
+    background-color: #10B981;
+}
+
+.progress-in-progress {
+    background-color: #F59E0B;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.activity-item {
+    border-left: 3px solid #4F46E5;
+    padding-left: 1rem;
+}
+
+.activity-item:not(:last-child) {
+    margin-bottom: 1.5rem;
+}
+
+.action-btn {
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+    .stat-card, .template-card, .project-card {
+        margin-bottom: 1rem;
+    }
+    
+    .nav-link {
+        font-size: 0.875rem;
+    }
+}
