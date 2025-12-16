@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Герой-секция -->
+<div class="text-center py-16 md:py-24">
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        Система автоматической генерации программного кода
+    </h1>
+    <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+        Ускорьте процесс разработки, снизьте количество рутинных задач и повысьте качество кода с помощью нашей интеллектуальной системы генерации
+    </p>
+    <a href="/generator" class="inline-flex items-center px-8 py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg hover:bg-indigo-700 transition shadow-lg">
+        Начать работу
+        <i class="fas fa-arrow-right ml-3"></i>
+    </a>
+</div>
+
+<!-- Преимущества -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+    <div class="text-center p-6">
+        <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-bolt text-indigo-600 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Быстрая разработка</h3>
+        <p class="text-gray-600">Генерируйте готовый код в несколько раз быстрее ручного написания</p>
+    </div>
+    
+    <div class="text-center p-6">
+        <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-shield-alt text-indigo-600 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Качество кода</h3>
+        <p class="text-gray-600">Автоматическое соблюдение best practices и паттернов разработки</p>
+    </div>
+    
+    <div class="text-center p-6">
+        <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-history text-indigo-600 text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">История проектов</h3>
+        <p class="text-gray-600">Все сгенерированные решения сохраняются для повторного использования</p>
+    </div>
+</div>
+
+<!-- Как это работает -->
+<div class="mt-20 bg-gray-50 rounded-2xl p-8">
+    <h2 class="text-3xl font-bold text-gray-900 text-center mb-10">Как это работает</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">1</div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Опишите задачу</h3>
+            <p class="text-gray-600">На русском или английском языке опишите, что должен делать код</p>
+        </div>
+        
+        <div class="flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">2</div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Выберите технологии</h3>
+            <p class="text-gray-600">Укажите язык программирования и фреймворк для генерации</p>
+        </div>
+        
+        <div class="flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4">3</div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Получите код</h3>
+            <p class="text-gray-600">Система сгенерирует готовое решение с комментариями</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

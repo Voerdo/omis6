@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block title %}Проекты - CodeGen АI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .project-card {
+        transition: all 0.3s ease;
+    }
+
+    .project-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .language-badge {
+        background-color: #E0E7FF;
+        color: #4F46E5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .framework-badge {
+        background-color: #D1FAE5;
+        color: #065F46;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        background-color: #f8fafc;
+        border: 2px dashed #d1d5db;
+        border-radius: 1rem;
+    }
+
+    .action-btn {
+        transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .code-preview {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 0.5rem;
+        max-height: 400px;
+        overflow: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Мои проекты</h1>
+        <p class="text-gray-600">История всех сгенерированных проектов и модулей</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="/generator" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition flex items-center">
+            <i class="fas fa-bolt mr-2"></i>
+            Создать новый проект
+        </a>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="mb-8">
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-xl text-white">
+        <div class="text-3xl font-bold">{{ total_generations }}</div>
+        <div class="opacity-90">Всего проектов</div>
+    </div>
+</div>
+
+<!-- Фильтры проектов -->
+<div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex-1">
+            <input type="text" 
+                   id="projectSearch" 
+                   placeholder="Поиск по названию или описанию..." 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <select id="languageFilter" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="all">Все языки</option>
+                <option value="TypeScript">TypeScript</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="Python">Python</option>
+                <option value="Java">Java</option>
+            </select>
+            <select id="sortFilter" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="newest">Сначала новые</option>
+                <option value="oldest">Сначала старые</option>
+                <option value="name">По названию</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Список проектов (генераций) -->
+<div id="projectsContainer" class="space-y-6 mb-12">
+    {% for generation in generations %}
+    <div class="project-card bg-white rounded-xl shadow-sm border p-6" data-language="{{ generation.language }}" data-name="{{ generation.requirements|lower }}" data-lines="{{ generation.lines_of_code }}">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between">
+            <div class="flex-1 mb-6 lg:mb-0 lg:mr-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ generation.requirements|truncate(100) }}</h3>
+                        <div class="flex flex-wrap items-center gap-2 mt-3 mb-4">
+                            <span class="language-badge">
+                                <i class="fas fa-code mr-1"></i>{{ generation.language }}
+                            </span>
+                            {% if generation.framework %}
+                            <span class="framework-badge">
+                                <i class="fas fa-cogs mr-1"></i>{{ generation.framework }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-file-code mr-1"></i>
+                    <span class="mr-4">{{ generation.lines_of_code }} строк кода</span>
+                    
+                    <i class="far fa-calendar mr-1"></i>
+                    <span>{{ generation.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </div>
+            </div>
+            
+            <div class="flex flex-col space-y-3 min-w-[200px]">
+                <div class="flex space-x-2">
+                    <button class="view-code-btn action-btn flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center" data-generation-id="{{ generation.id }}">
+                        <i class="fas fa-eye mr-2"></i>
+                        Просмотр кода
+                    </button>
+                    <button class="download-code-btn action-btn px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center justify-center" data-generation-id="{{ generation.id }}">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Модальное окно для просмотра кода -->
+<div id="codePreviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-lg bg-white">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Просмотр сгенерированного кода</h3>
+            <button id="closeCodeModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="mb-4">
+            <div id="modalRequirements" class="text-gray-700 mb-2"></div>
+            <div class="flex flex-wrap gap-2">
+                <span id="modalLanguage" class="language-badge"></span>
+                <span id="modalFramework" class="framework-badge"></span>
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-file-code mr-1"></i>
+                    <span id="modalLines"></span> строк кода
+                </span>
+            </div>
+        </div>
+        
+        <div class="code-preview p-4 mb-6">
+            <pre id="modalCode" class="text-sm text-gray-200 overflow-auto">
+// Код появится здесь
+            </pre>
+        </div>
+        
+        <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-500">
+                <i class="far fa-calendar mr-1"></i>
+                Создан: <span id="modalDate"></span>
+            </div>
+            <div class="flex space-x-3">
+                <button id="copyModalCodeBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-copy mr-2"></i>Копировать код
+                </button>
+                <button id="downloadModalCodeBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                    <i class="fas fa-download mr-2"></i>Скачать
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Пустое состояние (если нет генераций) -->
+<div id="emptyState" class="empty-state p-12 text-center rounded-xl mb-8 {% if generations %}hidden{% endif %}">
+    <div class="mb-6">
+        <i class="fas fa-code text-5xl text-gray-400"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-700 mb-2">У вас еще нет сгенерированного кода</h3>
+    <p class="text-gray-500 mb-6">Сгенерируйте свой первый код с помощью нашего генератора</p>
+    <a href="/generator" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+        <i class="fas fa-bolt mr-2"></i>Сгенерировать код
+    </a>
+</div>
+
+<!-- Информационная панель -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-6">
+    <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="mb-4 md:mb-0">
+            <h3 class="text-lg font-semibold text-blue-900 mb-2">Все генерации сохранены</h3>
+            <p class="text-blue-700">Вы всегда можете вернуться к ранее сгенерированному коду и использовать его снова</p>
+        </div>
+        <div class="text-sm text-blue-600">
+            <i class="fas fa-database mr-2"></i>
+            Автоматическое сохранение
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const projectSearch = document.getElementById('projectSearch');
+        const languageFilter = document.getElementById('languageFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const projectsContainer = document.getElementById('projectsContainer');
+        const projectCards = document.querySelectorAll('.project-card');
+        const viewCodeBtns = document.querySelectorAll('.view-code-btn');
+        const downloadCodeBtns = document.querySelectorAll('.download-code-btn');
+        const emptyState = document.getElementById('emptyState');
+        const codePreviewModal = document.getElementById('codePreviewModal');
+        const closeCodeModal = document.getElementById('closeCodeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalRequirements = document.getElementById('modalRequirements');
+        const modalLanguage = document.getElementById('modalLanguage');
+        const modalFramework = document.getElementById('modalFramework');
+        const modalLines = document.getElementById('modalLines');
+        const modalDate = document.getElementById('modalDate');
+        const modalCode = document.getElementById('modalCode');
+        const copyModalCodeBtn = document.getElementById('copyModalCodeBtn');
+        const downloadModalCodeBtn = document.getElementById('downloadModalCodeBtn');
+        
+        let currentGenerationId = null;
+        
+        // Показываем/скрываем пустое состояние
+        if (projectCards.length === 0) {
+            emptyState.classList.remove('hidden');
+        }
+        
+        // Фильтрация генераций
+        function filterGenerations() {
+            const searchTerm = projectSearch.value.toLowerCase();
+            const languageValue = languageFilter.value;
+            const sortValue = sortFilter.value;
+            
+            let visibleGenerations = [];
+            
+            projectCards.forEach(card => {
+                const language = card.getAttribute('data-language');
+                const name = card.getAttribute('data-name');
+                const lines = parseInt(card.getAttribute('data-lines'));
+                
+                // Проверяем соответствие поисковому запросу
+                const searchMatch = !searchTerm || name.includes(searchTerm);
+                
+                // Проверяем соответствие языку
+                const languageMatch = languageValue === 'all' || language === languageValue;
+                
+                // Показываем или скрываем карточку
+                if (searchMatch && languageMatch) {
+                    card.style.display = 'block';
+                    visibleGenerations.push({ card, lines, name });
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Сортировка
+            sortGenerations(visibleGenerations, sortValue);
+        }
+        
+        // Сортировка генераций
+        function sortGenerations(generations, sortBy) {
+            generations.sort((a, b) => {
+                if (sortBy === 'name') {
+                    return a.name.localeCompare(b.name);
+                } else if (sortBy === 'oldest') {
+                    const idA = parseInt(a.card.querySelector('.view-code-btn').getAttribute('data-generation-id'));
+                    const idB = parseInt(b.card.querySelector('.view-code-btn').getAttribute('data-generation-id'));
+                    return idA - idB;
+                } else {
+                    // newest (default)
+                    const idA = parseInt(a.card.querySelector('.view-code-btn').getAttribute('data-generation-id'));
+                    const idB = parseInt(b.card.querySelector('.view-code-btn').getAttribute('data-generation-id'));
+                    return idB - idA;
+                }
+            });
+            
+            // Переставляем карточки в контейнере
+            generations.forEach(({ card }) => {
+                projectsContainer.appendChild(card);
+            });
+        }
+        
+        // Слушатели событий для фильтров
+        projectSearch.addEventListener('input', filterGenerations);
+        languageFilter.addEventListener('change', filterGenerations);
+        sortFilter.addEventListener('change', filterGenerations);
+        
+        // Просмотр кода
+        viewCodeBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const generationId = this.getAttribute('data-generation-id');
+                currentGenerationId = generationId;
+                
+                try {
+                    // Загружаем данные генерации
+                    const response = await fetch(`/api/generated-codes/${generationId}`);
+                    const generation = await response.json();
+                    
+                    if (generation) {
+                        // Заполняем модальное окно данными
+                        modalRequirements.textContent = generation.requirements;
+                        modalCode.textContent = generation.generated_code;
+                        modalLanguage.textContent = generation.language;
+                        modalFramework.textContent = generation.framework || '';
+                        modalLines.textContent = generation.lines_of_code;
+                        modalDate.textContent = new Date(generation.created_at).toLocaleString('ru-RU');
+                        
+                        // Показываем модальное окно
+                        codePreviewModal.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при загрузке кода:', error);
+                    showNotification('Не удалось загрузить код', 'error');
+                }
+            });
+        });
+        
+        // Закрытие модального окна
+        closeCodeModal.addEventListener('click', function() {
+            codePreviewModal.classList.add('hidden');
+        });
+        
+        codePreviewModal.addEventListener('click', function(e) {
+            if (e.target === codePreviewModal) {
+                codePreviewModal.classList.add('hidden');
+            }
+        });
+        
+        // Копирование кода из модального окна
+        copyModalCodeBtn.addEventListener('click', function() {
+            const code = modalCode.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Код скопирован в буфер обмена', 'success');
+            });
+        });
+        
+        // Скачивание кода из модального окна
+        downloadModalCodeBtn.addEventListener('click', function() {
+            if (currentGenerationId) {
+                downloadGeneration(currentGenerationId);
+            }
+        });
+        
+        // Скачивание кода из списка
+        downloadCodeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const generationId = this.getAttribute('data-generation-id');
+                downloadGeneration(generationId);
+            });
+        });
+        
+        // Функция скачивания генерации
+        function downloadGeneration(generationId) {
+            // Находим карточку генерации
+            const generationCard = document.querySelector(`[data-generation-id="${generationId}"]`).closest('.project-card');
+            const requirements = generationCard.querySelector('h3').textContent;
+            const language = generationCard.getAttribute('data-language');
+            
+            // Получаем код генерации
+            fetch(`/api/generated-codes/${generationId}`)
+                .then(response => response.json())
+                .then(generation => {
+                    if (generation) {
+                        let extension = 'txt';
+                        if (language === 'TypeScript') extension = 'ts';
+                        if (language === 'JavaScript') extension = 'js';
+                        if (language === 'Python') extension = 'py';
+                        if (language === 'Java') extension = 'java';
+                        
+                        const fileName = `generated_${Date.now()}.${extension}`;
+                        const blob = new Blob([generation.generated_code], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        showNotification(`Код скачан как ${fileName}`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при скачивании кода:', error);
+                    showNotification('Не удалось скачать код', 'error');
+                });
+        }
+        
+        // Функция показа уведомлений
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ${getNotificationClass(type)}`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="${getNotificationIcon(type)} mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function getNotificationClass(type) {
+            const classes = {
+                'info': 'bg-blue-50 text-blue-800 border border-blue-200',
+                'success': 'bg-green-50 text-green-800 border border-green-200',
+                'warning': 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+            };
+            return classes[type] || classes.info;
+        }
+        
+        function getNotificationIcon(type) {
+            const icons = {
+                'info': 'fas fa-info-circle',
+                'success': 'fas fa-check-circle',
+                'warning': 'fas fa-exclamation-triangle'
+            };
+            return icons[type] || icons.info;
+        }
+    });
+</script>
+{% endblock %}

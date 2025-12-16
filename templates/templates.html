@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block title %}Библиотека шаблонов - CodeGen АI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-card {
+        transition: all 0.3s ease;
+    }
+    
+    .template-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tag {
+        display: inline-block;
+        background-color: #E0E7FF;
+        color: #4F46E5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .download-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .rating-badge {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
+    
+    .search-input {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='%239CA3AF'%3E%3Cpath fill-rule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clip-rule='evenodd' /%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.25rem;
+    }
+    
+    .filter-pill {
+        transition: all 0.2s ease;
+    }
+    
+    .filter-pill.active {
+        background-color: #4F46E5;
+        color: white;
+    }
+    
+    .empty-state {
+        background-color: #f8fafc;
+        border: 2px dashed #d1d5db;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Библиотека шаблонов</h1>
+    <p class="text-gray-600">Готовые решения и шаблоны кода для быстрой разработки</p>
+</div>
+
+<!-- Поиск и фильтры -->
+<div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="flex-1">
+            <div class="relative">
+                <input type="text" 
+                       id="templateSearch" 
+                       placeholder="Поиск по шаблонам..." 
+                       class="search-input w-full p-3 pl-4 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+        </div>
+        <div class="flex space-x-4">
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-700">Сортировка:</span>
+                <select id="sortSelect" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="popular">По популярности</option>
+                    <option value="downloads">По загрузкам</option>
+                    <option value="rating">По рейтингу</option>
+                    <option value="new">По новизне</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Фильтры по категориям -->
+    <div class="mb-6">
+        <h3 class="text-sm font-medium text-gray-700 mb-3">Категории</h3>
+        <div class="flex flex-wrap gap-2">
+            <button class="filter-pill px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-category="all">
+                Все категории
+            </button>
+            <button class="filter-pill px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-category="frontend">
+                Frontend
+            </button>
+            <button class="filter-pill px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-category="backend">
+                Backend
+            </button>
+            <button class="filter-pill px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-category="auth">
+                Аутентификация
+            </button>
+        </div>
+    </div>
+    
+    <!-- Фильтры по языкам -->
+    <div>
+        <h3 class="text-sm font-medium text-gray-700 mb-3">Языки программирования</h3>
+        <div class="flex flex-wrap gap-2">
+            <button class="filter-pill px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-language="all">
+                Все языки
+            </button>
+            <button class="filter-pill px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-language="TypeScript">
+                TypeScript
+            </button>
+            <button class="filter-pill px=4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-language="JavaScript">
+                JavaScript
+            </button>
+            <button class="filter-pill px=4 py-2 rounded-full border border-gray-300 text-gray-700 hover:border-indigo-300 hover:text-indigo-600" data-language="Python">
+                Python
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Список шаблонов -->
+<div id="templatesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+    {% for template in templates %}
+    <div class="template-card bg-white rounded-xl shadow-sm border p-6" data-category="{{ template.category }}" data-language="{{ template.language }}" data-tags="{{ template.tags }}">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ template.name }}</h3>
+                <p class="text-gray-600 text-sm mt-1">{{ template.description }}</p>
+            </div>
+            <span class="rating-badge px-2 py-1 rounded text-xs font-medium">
+                <i class="fas fa-star mr-1"></i>{{ template.rating }}
+            </span>
+        </div>
+        
+        <div class="mb-4">
+            <span class="tag">{{ template.language }}</span>
+            {% if template.framework %}
+            <span class="tag">{{ template.framework }}</span>
+            {% endif %}
+            <span class="tag">{{ template.category }}</span>
+        </div>
+        
+        <div class="flex justify-between items-center">
+            <div class="text-sm text-gray-500">
+                <i class="fas fa-download mr-1"></i>
+                {{ template.downloads }} загрузок
+            </div>
+            <div class="flex space-x-2">
+                <button class="preview-btn px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition" data-template-id="{{ template.id }}">
+                    <i class="fas fa-eye mr-1"></i>Просмотр
+                </button>
+                <button class="download-template-btn px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition" data-template-id="{{ template.id }}">
+                    <i class="fas fa-download mr-1"></i>Скачать
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Модальное окно для предпросмотра -->
+<div id="previewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-lg bg-white">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Предпросмотр шаблона</h3>
+            <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="bg-gray-900 rounded-lg p-4 mb-6">
+            <pre id="modalCode" class="text-sm text-gray-200 overflow-auto max-h-96">
+// Код шаблона появится здесь
+            </pre>
+        </div>
+        
+        <div class="flex justify-between items-center">
+            <div>
+                <span id="modalLanguage" class="tag">TypeScript</span>
+                <span id="modalCategory" class="tag">backend</span>
+                <span id="modalDownloads" class="text-sm text-gray-500">
+                    <i class="fas fa-download mr-1"></i>
+                    <span id="modalDownloadsCount">0</span> загрузок
+                </span>
+            </div>
+            <div class="flex space-x-3">
+                <button id="useTemplateBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-edit mr-2"></i>Использовать
+                </button>
+                <button id="downloadModalBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                    <i class="fas fa-download mr-2"></i>Скачать шаблон
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Информационная панель -->
+<div class="bg-indigo-50 rounded-xl border border-indigo-100 p-6">
+    <div class="text-center">
+        <h3 class="text-lg font-semibold text-indigo-900 mb-2">Не нашли нужный шаблон?</h3>
+        <p class="text-indigo-700">Используйте генератор кода для создания собственных решений</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('templateSearch');
+        const filterPills = document.querySelectorAll('.filter-pill');
+        const templateCards = document.querySelectorAll('.template-card');
+        const previewBtns = document.querySelectorAll('.preview-btn');
+        const downloadBtns = document.querySelectorAll('.download-template-btn');
+        const previewModal = document.getElementById('previewModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalCode = document.getElementById('modalCode');
+        const modalLanguage = document.getElementById('modalLanguage');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalDownloadsCount = document.getElementById('modalDownloadsCount');
+        const useTemplateBtn = document.getElementById('useTemplateBtn');
+        const downloadModalBtn = document.getElementById('downloadModalBtn');
+        const sortSelect = document.getElementById('sortSelect');
+        
+        let activeCategory = 'all';
+        let activeLanguage = 'all';
+        let currentTemplateId = null;
+        
+        // Поиск шаблонов
+        searchInput.addEventListener('input', function() {
+            filterTemplates();
+        });
+        
+        // Сортировка
+        sortSelect.addEventListener('change', function() {
+            sortTemplates(this.value);
+        });
+        
+        // Фильтрация по категориям
+        filterPills.forEach(pill => {
+            pill.addEventListener('click', function() {
+                // Убираем активный класс со всех кнопок
+                filterPills.forEach(p => p.classList.remove('active'));
+                
+                // Добавляем активный класс нажатой кнопке
+                this.classList.add('active');
+                
+                // Определяем тип фильтра
+                const filterType = this.hasAttribute('data-category') ? 'category' : 'language';
+                const filterValue = filterType === 'category' 
+                    ? this.getAttribute('data-category') 
+                    : this.getAttribute('data-language');
+                
+                // Обновляем активные фильтры
+                if (filterType === 'category') {
+                    activeCategory = filterValue;
+                } else {
+                    activeLanguage = filterValue;
+                }
+                
+                // Применяем фильтры
+                filterTemplates();
+            });
+        });
+        
+        // Функция фильтрации шаблонов
+        function filterTemplates() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            templateCards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const language = card.getAttribute('data-language');
+                const tags = card.getAttribute('data-tags') || '';
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                // Проверяем соответствие категории
+                const categoryMatch = activeCategory === 'all' || category === activeCategory;
+                
+                // Проверяем соответствие языку
+                const languageMatch = activeLanguage === 'all' || language === activeLanguage;
+                
+                // Проверяем соответствие поисковому запросу
+                const searchMatch = !searchTerm || 
+                    title.includes(searchTerm) || 
+                    description.includes(searchTerm) || 
+                    tags.toLowerCase().includes(searchTerm);
+                
+                // Показываем или скрываем карточку
+                if (categoryMatch && languageMatch && searchMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // Функция сортировки шаблонов
+        function sortTemplates(sortBy) {
+            const container = document.getElementById('templatesContainer');
+            const cards = Array.from(templateCards);
+            
+            cards.sort((a, b) => {
+                if (sortBy === 'downloads') {
+                    const downloadsA = parseInt(a.querySelector('.fa-download').parentNode.textContent.replace(/[^0-9]/g, ''));
+                    const downloadsB = parseInt(b.querySelector('.fa-download').parentNode.textContent.replace(/[^0-9]/g, ''));
+                    return downloadsB - downloadsA;
+                } else if (sortBy === 'rating') {
+                    const ratingA = parseFloat(a.querySelector('.rating-badge').textContent.replace(/[^0-9.]/g, ''));
+                    const ratingB = parseFloat(b.querySelector('.rating-badge').textContent.replace(/[^0-9.]/g, ''));
+                    return ratingB - ratingA;
+                } else if (sortBy === 'new') {
+                    // Предполагаем, что новые шаблоны имеют больший ID
+                    const idA = parseInt(a.querySelector('.preview-btn').getAttribute('data-template-id'));
+                    const idB = parseInt(b.querySelector('.preview-btn').getAttribute('data-template-id'));
+                    return idB - idA;
+                } else {
+                    // По популярности (default)
+                    const downloadsA = parseInt(a.querySelector('.fa-download').parentNode.textContent.replace(/[^0-9]/g, ''));
+                    const downloadsB = parseInt(b.querySelector('.fa-download').parentNode.textContent.replace(/[^0-9]/g, ''));
+                    return downloadsB - downloadsA;
+                }
+            });
+            
+            // Переставляем карточки в контейнере
+            cards.forEach(card => {
+                container.appendChild(card);
+            });
+        }
+        
+        // Предпросмотр шаблона
+        previewBtns.forEach((btn) => {
+            btn.addEventListener('click', async function() {
+                const templateId = this.getAttribute('data-template-id');
+                currentTemplateId = templateId;
+                
+                try {
+                    // Загружаем данные шаблона
+                    const response = await fetch(`/api/templates`);
+                    const templates = await response.json();
+                    const template = templates.find(t => t.id == templateId);
+                    
+                    if (template) {
+                        // Заполняем модальное окно данными
+                        modalTitle.textContent = template.name;
+                        modalCode.textContent = template.code;
+                        modalLanguage.textContent = template.language;
+                        modalCategory.textContent = template.category;
+                        modalDownloadsCount.textContent = template.downloads;
+                        
+                        // Показываем модальное окно
+                        previewModal.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при загрузке шаблона:', error);
+                    showNotification('Не удалось загрузить шаблон', 'error');
+                }
+            });
+        });
+        
+        // Закрытие модального окна
+        closeModal.addEventListener('click', function() {
+            previewModal.classList.add('hidden');
+        });
+        
+        // Закрытие модального окна при клике вне его
+        previewModal.addEventListener('click', function(e) {
+            if (e.target === previewModal) {
+                previewModal.classList.add('hidden');
+            }
+        });
+        
+        // Использование шаблона
+        useTemplateBtn.addEventListener('click', function() {
+            if (currentTemplateId) {
+                // Перенаправляем на страницу генератора с выбранным шаблоном
+                window.location.href = `/generator?template=${currentTemplateId}`;
+            }
+        });
+        
+        // Скачивание шаблона из модального окна
+        downloadModalBtn.addEventListener('click', function() {
+            if (currentTemplateId) {
+                downloadTemplate(currentTemplateId);
+            }
+        });
+        
+        // Скачивание шаблона
+        downloadBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const templateId = this.getAttribute('data-template-id');
+                downloadTemplate(templateId);
+            });
+        });
+        
+        function downloadTemplate(templateId) {
+            // Находим шаблон
+            const templateCard = document.querySelector(`[data-template-id="${templateId}"]`).closest('.template-card');
+            const templateName = templateCard.querySelector('h3').textContent;
+            const language = templateCard.getAttribute('data-language');
+            
+            // Получаем код шаблона
+            fetch(`/api/templates`)
+                .then(response => response.json())
+                .then(templates => {
+                    const template = templates.find(t => t.id == templateId);
+                    if (template) {
+                        let extension = 'txt';
+                        if (language === 'TypeScript') extension = 'ts';
+                        if (language === 'JavaScript') extension = 'js';
+                        if (language === 'Python') extension = 'py';
+                        if (language === 'Java') extension = 'java';
+                        
+                        const fileName = `${templateName.replace(/\s+/g, '_').toLowerCase()}.${extension}`;
+                        const blob = new Blob([template.code], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        // Увеличиваем счетчик загрузок
+                        const downloadsElement = templateCard.querySelector('.fa-download').parentNode;
+                        const currentDownloads = parseInt(downloadsElement.textContent.replace(/[^0-9]/g, ''));
+                        downloadsElement.innerHTML = `<i class="fas fa-download mr-1"></i>${(currentDownloads + 1).toLocaleString()} загрузок`;
+                        
+                        showNotification(`Шаблон "${templateName}" скачан`, 'success');
+                        
+                        // Отправляем запрос на сервер для обновления счетчика
+                        fetch(`/api/templates/${templateId}/download`, {
+                            method: 'POST'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при скачивании шаблона:', error);
+                    showNotification('Не удалось скачать шаблон', 'error');
+                });
+        }
+        
+        // Функция показа уведомлений
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ${getNotificationClass(type)}`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="${getNotificationIcon(type)} mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function getNotificationClass(type) {
+            const classes = {
+                'info': 'bg-blue-50 text-blue-800 border border-blue-200',
+                'success': 'bg-green-50 text-green-800 border border-green-200',
+                'warning': 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+            };
+            return classes[type] || classes.info;
+        }
+        
+        function getNotificationIcon(type) {
+            const icons = {
+                'info': 'fas fa-info-circle',
+                'success': 'fas fa-check-circle',
+                'warning': 'fas fa-exclamation-triangle'
+            };
+            return icons[type] || icons.info;
+        }
+        
+        // Инициализация активного фильтра
+        document.querySelector('[data-category="all"]').classList.add('active');
+        document.querySelector('[data-language="all"]').classList.add('active');
+    });
+</script>
+{% endblock %}

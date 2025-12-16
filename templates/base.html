@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CodeGen АI - Автоматическая генерация кода{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Навигация -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="/" class="flex items-center">
+                            <i class="fas fa-code text-2xl text-indigo-600 mr-2"></i>
+                            <span class="text-xl font-bold text-gray-900">CodeGen АI</span>
+                            <span class="ml-2 text-sm text-gray-500 hidden md:inline">Автоматическая генерация кода</span>
+                        </a>
+                    </div>
+                    <div class="hidden sm:ml-8 sm:flex sm:space-x-6">
+                        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Главная</a>
+                        <a href="/generator" class="nav-link {% if request.url.path == '/generator' %}active{% endif %}">Генератор</a>
+                        <a href="/templates" class="nav-link {% if request.url.path == '/templates' %}active{% endif %}">Шаблоны</a>
+                        <a href="/projects" class="nav-link {% if request.url.path == '/projects' %}active{% endif %}">Проекты</a>
+                        <a href="/profile" class="nav-link {% if request.url.path == '/profile' %}active{% endif %}">Профиль</a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    {% if user %}
+                    <div class="flex items-center space-x-4">
+                        <a href="/profile" class="flex items-center text-sm hover:text-gray-900">
+                            <img class="h-8 w-8 rounded-full" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=User&background=4F46E5&color=fff' }}" alt="User avatar">
+                            <span class="ml-2 text-gray-700 hidden md:inline">{{ user.username or 'Пользователь' }}</span>
+                        </a>
+                        <button id="logoutBtn" class="text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100" title="Выйти">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="ml-1 hidden md:inline">Выход</span>
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="flex space-x-4">
+                        <a href="/login" class="px-4 py-2 text-sm text-gray-700 hover:text-gray-900">Вход</a>
+                        <a href="/register" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Регистрация</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Футер -->
+    <footer class="bg-white border-t mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fas fa-code text-xl text-indigo-600 mr-2"></i>
+                        <span class="text-lg font-bold text-gray-900">CodeGen АI</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mt-1">Система автоматического генерирования программного кода</p>
+                </div>
+                <div class="text-gray-600 text-sm">
+                    © 2024 CodeGen АI. Все права защищены.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+    
+    {% if user %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    try {
+                        const response = await fetch('/api/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            credentials: 'include'  // Важно для отправки куки
+                        });
+                        
+                        if (response.ok) {
+                            // Перенаправляем на главную страницу
+                            window.location.href = '/';
+                        } else {
+                            console.error('Ошибка при выходе');
+                        }
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

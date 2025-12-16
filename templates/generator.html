@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}Генератор кода - CodeGen АI{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<style>
+    .requirements-input {
+        min-height: 200px;
+        resize: vertical;
+    }
+    
+    .generated-code {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 0.5rem;
+    }
+    
+    .language-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .framework-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+    }
+    
+    .stat-item {
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Генератор кода</h1>
+    <p class="text-gray-600">Опишите требования к коду, и система автоматически создаст готовое решение</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Левая колонка - Настройки и требования -->
+    <div>
+        <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Конфигурация</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Язык программирования</label>
+                    <select id="languageSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="TypeScript" selected>TypeScript</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="Python">Python</option>
+                        <option value="Java">Java</option>
+                        <option value="C#">C#</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Фреймворк</label>
+                    <select id="frameworkSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="React" selected>React</option>
+                        <option value="Vue">Vue</option>
+                        <option value="Angular">Angular</option>
+                        <option value="Express">Express</option>
+                        <option value="Django">Django</option>
+                        <option value="FastAPI">FastAPI</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Требования и спецификации</h2>
+            <p class="text-gray-600 mb-4">Опишите что должен делать код. Например:</p>
+            
+            <div class="bg-gray-50 p-4 rounded-lg mb-4 border-l-4 border-indigo-500">
+                <p class="text-gray-700 italic">Создать React компонент для отображения списка пользователей с возможностью фильтрации по имени. Компонент должен загружать данные из API и показывать индикатор загрузки.</p>
+            </div>
+            
+            <textarea id="requirementsInput" class="requirements-input w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Введите ваши требования здесь..."></textarea>
+            
+            <div class="flex items-center justify-between mt-4">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    Чем подробнее описание, тем лучше результат
+                </div>
+                <button id="generateBtn" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition flex items-center">
+                    <i class="fas fa-bolt mr-2"></i>
+                    Сгенерировать код
+                </button>
+            </div>
+        </div>
+        
+        <!-- Примеры требований -->
+        <div class="mt-6">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Примеры для быстрого старта:</h3>
+            <div class="space-y-2">
+                <button class="example-btn w-full text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-sm" data-example="Создать React компонент для отображения списка пользователей с возможностью фильтрации по имени">
+                    <div class="flex items-center">
+                        <i class="fas fa-code text-indigo-600 mr-2"></i>
+                        <span>React компонент списка пользователей</span>
+                    </div>
+                </button>
+                <button class="example-btn w-full text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-sm" data-example="Создать REST API endpoint для управления продуктами с CRUD операциями">
+                    <div class="flex items-center">
+                        <i class="fas fa-server text-indigo-600 mr-2"></i>
+                        <span>REST API для управления продуктами</span>
+                    </div>
+                </button>
+                <button class="example-btn w-full text-left p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition text-sm" data-example="Создать форму регистрации с валидацией email и пароля">
+                    <div class="flex items-center">
+                        <i class="fas fa-edit text-indigo-600 mr-2"></i>
+                        <span>Форма регистрации с валидацией</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Правая колонка - Результат -->
+    <div>
+        <div class="bg-white rounded-xl shadow-sm border p-6 h-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Сгенерированный код</h2>
+                <div class="flex space-x-2">
+                    <button id="copyBtn" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition">
+                        <i class="fas fa-copy mr-1"></i>Копировать
+                    </button>
+                    <button id="downloadBtn" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition">
+                        <i class="fas fa-download mr-1"></i>Скачать
+                    </button>
+                </div>
+            </div>
+            
+            <div class="generated-code p-4 rounded-lg overflow-auto max-h-[500px] relative">
+                <button id="copyBtnInline" class="copy-btn px-3 py-1 text-sm bg-gray-800 text-gray-300 rounded hover:bg-gray-700 transition opacity-0 hover:opacity-100">
+                    <i class="fas fa-copy mr-1"></i>
+                </button>
+                <pre id="codeOutput" class="code-editor"><code class="language-typescript">// Код появится здесь после генерации
+// Опишите требования и нажмите "Сгенерировать код"
+
+// Пример сгенерированного кода:
+import React, { useState, useEffect } from 'react';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const UserList: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [filter, setFilter] = useState<string>('');
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  if (loading) return <div>Загрузка...</div>;
+
+  return (
+    <div className="user-list">
+      <input
+        type="text"
+        placeholder="Фильтр по имени"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        className="filter-input"
+      />
+      <ul>
+        {filteredUsers.map(user => (
+          <li key={user.id}>
+            {user.name} - {user.email}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default UserList;</code></pre>
+            </div>
+            
+            <div id="codeStats" class="mt-6 p-4 bg-gray-50 rounded-lg border hidden">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Информация о сгенерированном коде</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="stat-item">
+                        <div class="text-sm text-gray-500">Язык</div>
+                        <div id="statLanguage" class="font-medium text-gray-900">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="text-sm text-gray-500">Строк кода</div>
+                        <div id="statLines" class="font-medium text-gray-900">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="text-sm text-gray-500">Фреймворк</div>
+                        <div id="statFramework" class="font-medium text-gray-900">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="text-sm text-gray-500">Статус</div>
+                        <div id="statStatus" class="font-medium text-gray-900">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-indigo-500 mt-1 mr-3"></i>
+                    <div>
+                        <h4 class="text-sm font-medium text-indigo-900 mb-1">Советы по использованию</h4>
+                        <ul class="text-sm text-indigo-700 space-y-1">
+                            <li>• Указывайте конкретные требования (компоненты, функции, API)</li>
+                            <li>• Добавляйте информацию о типе данных и структуре</li>
+                            <li>• Можете использовать примеры кода или псевдокод</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Валидация и оптимизация -->
+<div id="validationSection" class="mt-8 hidden">
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Валидация и оптимизация</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Результаты проверки</h3>
+                <div id="validationResults" class="space-y-3">
+                    <!-- Результаты будут добавлены через JavaScript -->
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Предложения по оптимизации</h3>
+                <div id="optimizationSuggestions" class="space-y-2">
+                    <!-- Предложения будут добавлены через JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateBtn = document.getElementById('generateBtn');
+        const requirementsInput = document.getElementById('requirementsInput');
+        const languageSelect = document.getElementById('languageSelect');
+        const frameworkSelect = document.getElementById('frameworkSelect');
+        const codeOutput = document.getElementById('codeOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyBtnInline = document.getElementById('copyBtnInline');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const codeStats = document.getElementById('codeStats');
+        const statLanguage = document.getElementById('statLanguage');
+        const statLines = document.getElementById('statLines');
+        const statFramework = document.getElementById('statFramework');
+        const statStatus = document.getElementById('statStatus');
+        const validationSection = document.getElementById('validationSection');
+        const validationResults = document.getElementById('validationResults');
+        const optimizationSuggestions = document.getElementById('optimizationSuggestions');
+        const exampleBtns = document.querySelectorAll('.example-btn');
+        
+        // Примеры требований
+        exampleBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const example = this.getAttribute('data-example');
+                requirementsInput.value = example;
+                
+                // Автоматически выбираем соответствующий язык и фреймворк
+                if (example.includes('React')) {
+                    languageSelect.value = 'TypeScript';
+                    frameworkSelect.value = 'React';
+                } else if (example.includes('REST API') || example.includes('Express')) {
+                    languageSelect.value = 'JavaScript';
+                    frameworkSelect.value = 'Express';
+                } else if (example.includes('форма')) {
+                    languageSelect.value = 'TypeScript';
+                    frameworkSelect.value = 'React';
+                }
+                
+                showNotification('Пример загружен в поле ввода', 'info');
+            });
+        });
+        
+        // Генерация кода
+        generateBtn.addEventListener('click', async function() {
+            const requirements = requirementsInput.value.trim();
+            const language = languageSelect.value;
+            const framework = frameworkSelect.value;
+            
+            if (!requirements) {
+                showNotification('Пожалуйста, введите требования для генерации кода', 'warning');
+                return;
+            }
+            
+            // Показываем загрузку
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Генерация...';
+            generateBtn.disabled = true;
+            
+            try {
+                // Отправляем запрос на сервер
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        requirements: requirements,
+                        language: language,
+                        framework: framework
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Обновляем отображение кода
+                codeOutput.textContent = result.generated_code;
+                
+                // Определяем язык для подсветки синтаксиса
+                let languageClass = 'language-javascript';
+                if (result.language === 'TypeScript') languageClass = 'language-typescript';
+                if (result.language === 'Python') languageClass = 'language-python';
+                if (result.language === 'Java') languageClass = 'language-java';
+                if (result.language === 'C#') languageClass = 'language-csharp';
+                
+                codeOutput.className = languageClass;
+                Prism.highlightElement(codeOutput);
+                
+                // Обновляем статистику
+                statLanguage.textContent = result.language;
+                statLines.textContent = result.lines_of_code;
+                statFramework.textContent = result.framework;
+                statStatus.textContent = result.status;
+                
+                // Показываем статистику
+                codeStats.classList.remove('hidden');
+                
+                showNotification('Код успешно сгенерирован!', 'success');
+                
+                // Запускаем валидацию
+                await validateCode(result.id);
+                
+            } catch (error) {
+                console.error('Ошибка при генерации кода:', error);
+                showNotification('Произошла ошибка при генерации кода. Пожалуйста, попробуйте снова.', 'error');
+            } finally {
+                // Восстанавливаем кнопку
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+            }
+        });
+        
+        // Валидация кода
+        async function validateCode(codeId) {
+            try {
+                const response = await fetch(`/api/validate/${codeId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                // Показываем результаты валидации
+                validationSection.classList.remove('hidden');
+                validationResults.innerHTML = '';
+                optimizationSuggestions.innerHTML = '';
+                
+                if (result.errors && result.errors.length > 0) {
+                    result.errors.forEach(error => {
+                        validationResults.innerHTML += `
+                            <div class="flex items-center p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <i class="fas fa-times-circle text-red-600 mr-3"></i>
+                                <span class="text-red-700">${error}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    validationResults.innerHTML = `
+                        <div class="flex items-center p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                            <span class="text-green-700">Код прошел проверку без ошибок</span>
+                        </div>
+                    `;
+                }
+                
+                if (result.warnings && result.warnings.length > 0) {
+                    result.warnings.forEach(warning => {
+                        validationResults.innerHTML += `
+                            <div class="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
+                                <span class="text-yellow-700">${warning}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (result.suggestions && result.suggestions.length > 0) {
+                    result.suggestions.forEach(suggestion => {
+                        optimizationSuggestions.innerHTML += `
+                            <div class="flex items-center p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                                <i class="fas fa-lightbulb text-blue-600 mr-3"></i>
+                                <span class="text-blue-700 text-sm">${suggestion}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    optimizationSuggestions.innerHTML = `
+                        <div class="text-gray-500 text-sm italic">
+                            Нет предложений по оптимизации
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Ошибка при валидации кода:', error);
+            }
+        }
+        
+        // Копирование кода
+        copyBtn.addEventListener('click', copyCode);
+        copyBtnInline.addEventListener('click', copyCode);
+        
+        function copyCode() {
+            const code = codeOutput.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Код скопирован в буфер обмена!', 'success');
+            });
+        }
+        
+        // Скачивание кода
+        downloadBtn.addEventListener('click', function() {
+            const code = codeOutput.textContent;
+            const language = languageSelect.value;
+            const framework = frameworkSelect.value;
+            
+            if (!code || code.includes('Код появится здесь')) {
+                showNotification('Сначала сгенерируйте код', 'warning');
+                return;
+            }
+            
+            // Определяем расширение файла
+            let extension = 'txt';
+            if (language === 'TypeScript') extension = 'ts';
+            if (language === 'JavaScript') extension = 'js';
+            if (language === 'Python') extension = 'py';
+            if (language === 'Java') extension = 'java';
+            if (language === 'C#') extension = 'cs';
+            
+            const fileName = `generated_${framework.toLowerCase()}_${Date.now()}.${extension}`;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification(`Код сохранен в файл ${fileName}`, 'success');
+        });
+        
+        // Показывать/скрывать кнопку копирования при наведении на блок кода
+        const codeBlock = document.querySelector('.generated-code');
+        codeBlock.addEventListener('mouseenter', function() {
+            copyBtnInline.classList.remove('opacity-0');
+        });
+        
+        codeBlock.addEventListener('mouseleave', function() {
+            copyBtnInline.classList.add('opacity-0');
+        });
+        
+        // Уведомления
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ${getNotificationClass(type)}`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="${getNotificationIcon(type)} mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Автоматическое скрытие
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function getNotificationClass(type) {
+            const classes = {
+                'info': 'bg-blue-50 text-blue-800 border border-blue-200',
+                'success': 'bg-green-50 text-green-800 border border-green-200',
+                'warning': 'bg-yellow-50 text-yellow-800 border border-yellow-200',
+                'error': 'bg-red-50 text-red-800 border border-red-200'
+            };
+            return classes[type] || classes.info;
+        }
+        
+        function getNotificationIcon(type) {
+            const icons = {
+                'info': 'fas fa-info-circle',
+                'success': 'fas fa-check-circle',
+                'warning': 'fas fa-exclamation-triangle',
+                'error': 'fas fa-times-circle'
+            };
+            return icons[type] || icons.info;
+        }
+        
+        // Инициализация подсветки синтаксиса
+        Prism.highlightAll();
+    });
+</script>
+{% endblock %}
